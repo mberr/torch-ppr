@@ -50,8 +50,9 @@ def page_rank(
     :param epsilon: ``epsilon > 0``
         a (small) constant to check for convergence
     :param x0: shape: ``(n,)``
-        the initial value for ``x``. If ``None``, set to a constant $1/n$ vector, cf. :func:`torch_ppr.utils.prepare_x0`.
-        Otherwise, the tensor is checked for being valid using :func:`torch_ppr.utils.validate_x`.
+        the initial value for ``x``. If ``None``, set to a constant $1/n$ vector,
+        cf. :func:`torch_ppr.utils.prepare_x0`. Otherwise, the tensor is checked for being valid using
+        :func:`torch_ppr.utils.validate_x`.
     :param use_tqdm:
         whether to use a tqdm progress bar
     :param device:
