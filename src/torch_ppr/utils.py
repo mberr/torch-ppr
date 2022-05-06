@@ -271,7 +271,7 @@ def power_iteration(
         # calculate difference, shape: (batch_size,)
         diff = torch.linalg.norm(x - x_old, ord=float("+inf"), axis=0)
         mask = diff > epsilon
-        progress.set_postfix(max_diff=diff.max().item())
+        progress.set_postfix(max_diff=diff.max().item(), non_converged=mask.sum())
         if not mask.any():
             logger.debug(f"Converged after {i} iterations up to {epsilon}.")
             break
