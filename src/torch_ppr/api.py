@@ -112,7 +112,10 @@ def personalized_page_rank(
     """
     # prepare adjacency and indices only once
     adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index)
-    indices = torch.arange(adj.shape[0], device=device)
+    if indices is None:
+        indices = torch.arange(adj.shape[0], device=device)
+    else:
+        indices = torch.as_tensor(indices, dtype=torch.long, device=device)
     # normalize inputs
     batch_size = batch_size or len(indices)
     device = resolve_device(device=device)
