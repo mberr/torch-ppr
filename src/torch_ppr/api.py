@@ -39,9 +39,9 @@ def page_rank(
     Compute page rank by power iteration.
 
     :param adj:
-        the adjacency matrix, cf. :func:`prepare_page_rank_adjacency`. Preferred over `edge_index`.
+        the adjacency matrix, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`. Preferred over `edge_index`.
     :param edge_index: shape: `(2, m)`
-        the edge index of the graph, i.e, the edge list.
+        the edge index of the graph, i.e, the edge list. cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
     :param max_iter: $max_iter > 0$
         the maximum number of iterations
     :param alpha: $0 < alpha < 1$
@@ -49,7 +49,7 @@ def page_rank(
     :param epsilon: $epsilon > 0$
         a (small) constant to check for convergence
     :param x0: shape: `(n,)`
-        the initial value for $x$. If `None`, set to a constant $1/n$ vector.
+        the initial value for $x$. If `None`, set to a constant $1/n$ vector, cf. :func:`torch_ppr.utils.prepare_x0`.
     :param use_tqdm:
         whether to use a tqdm progress bar
     :param device:
@@ -95,9 +95,9 @@ def personalized_page_rank(
         this method supports automatic memory optimization / batch size selection using :mod:`torch_max_mem`.
 
     :param adj: shape: (n, n)
-        the adjacency matrix, cf. :func:`prepare_page_rank_adjacency`
+        the adjacency matrix, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
     :param edge_index: shape: (2, m)
-        the edge index, cf. :func:`prepare_page_rank_adjacency`
+        the edge index, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
     :param indices: shape: (k,)
         the node indices for which to calculate the PPR. Defaults to all nodes.
     :param device:
@@ -105,7 +105,7 @@ def personalized_page_rank(
     :param batch_size: >0
         the batch size. Defaults to the number of indices. It will be reduced if necessary.
     :param kwargs:
-        additional keyword-based parameters passed to :func:`batched_personalized_page_rank`
+        additional keyword-based parameters passed to :func:`torch_ppr.utils.batched_personalized_page_rank`
 
     :return: shape: `(k, n)`
         the PPR vectors for each node index
