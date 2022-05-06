@@ -51,10 +51,13 @@ def prepare_num_nodes(edge_index: torch.Tensor, num_nodes: Optional[int] = None)
     """
     Prepare the number of nodes.
 
-    :param edge_index: shape: $(2, m)$
+    If an explicit number is given, this number will be used. Otherwise, infers the number of nodes as the maximum id
+    in the edge index.
+
+    :param edge_index: shape: ``(2, m)``
         the edge index
     :param num_nodes:
-        the number of nodes. If None, it is inferred from `edge_index`.
+        the number of nodes. If ``None``, it is inferred from ``edge_index``.
 
     :return:
         the number of nodes
