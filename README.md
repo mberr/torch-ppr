@@ -38,9 +38,22 @@
     </a>
 </p>
 
-(Personalized) Page-Rank computation using PyTorch
+This package allows calculating page-rank and personalized page-rank via power iteration with PyTorch,
+which also supports calculation on GPU (or other accelerators).
 
 ## 💪 Getting Started
+
+As a simple example, consider this simple graph with four nodes.
+Its edge list is given as
+```python
+edge_index = torch.as_tensor(data=[(0, 1), (1, 2), (1, 3)]).t()
+```
+
+We can use
+```python
+x = page_rank(edge_index)
+```
+to calculate the page rank, i.e., a measure of global importance.
 
 > TODO show in a very small amount of space the **MOST** useful thing your package can do.
 Make it as short as possible! You have an entire set of docs for later.
