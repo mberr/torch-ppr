@@ -26,8 +26,8 @@ class APITest(unittest.TestCase):
 
     def test_page_rank(self):
         """Test Page Rank calculation."""
-        r = api.page_rank(edge_index=self.edge_index)
+        api.page_rank(edge_index=self.edge_index)
 
     def test_personalized_page_rank(self):
         """Test Personalized Page Rank calculation."""
-        r = api.personalized_page_rank(edge_index=self.edge_index)
+        api.personalized_page_rank(edge_index=self.edge_index)
