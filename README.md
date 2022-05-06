@@ -44,6 +44,10 @@ which also supports calculation on GPU (or other accelerators).
 ## 💪 Getting Started
 
 As a simple example, consider this simple graph with five nodes.
+<p align="center">
+  <img src="docs/source/img/small_graph.svg" height="300">
+</p>
+
 Its edge list is given as
 ```python-console
 >>> edge_index = torch.as_tensor(data=[(0, 1), (1, 2), (1, 3), (2, 4)]).t()
@@ -67,7 +71,7 @@ tensor([[0.1103, 0.3484, 0.2922, 0.1103, 0.1388]])
 ```
 
 By the virtue of using PyTorch, the code seamlessly works on GPUs, too, and
-support auto-grad differentiation. Moreover, the calculation of personalized
+supports auto-grad differentiation. Moreover, the calculation of personalized
 page rank supports automatic batch size optimization via
 [`torch_max_mem`](https://github.com/mberr/torch-max-mem).
 
