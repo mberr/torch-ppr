@@ -1,9 +1,10 @@
 """Utility functions."""
 import logging
-from typing import Collection, Optional, Union
+from typing import Any, Collection, Mapping, Optional, Union
 
 import torch
 from torch.nn import functional
+from torch_max_mem import MemoryUtilizationMaximizer
 from tqdm.auto import tqdm
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "validate_x",
     "prepare_x0",
     "power_iteration",
+    "batched_personalized_page_rank",
 ]
 
 logger = logging.getLogger(__name__)
@@ -282,3 +284,44 @@ def power_iteration(
     if no_batch:
         x = x.squeeze(dim=-1)
     return x
+
+
+def _ppr_hasher(kwargs: Mapping[str, Any]) -> int:
+    # assumption: batched PPR memory consumption only depends on the matrix A,
+    # in particular, the shape and the number of nonzero elements
+    adj: torch.Tensor = kwargs.get("adj")
+    return hash((adj.shape[0], getattr(adj, "nnz", adj.numel())))
+
+
+ppr_maximizer = MemoryUtilizationMaximizer(hasher=_ppr_hasher)
+
+
+@ppr_maximizer
+def batched_personalized_page_rank(
+    adj: torch.Tensor,
+    indices: torch.Tensor,
+    batch_size: int,
+    **kwargs,
+) -> torch.Tensor:
+    """
+    Batch-wise PPR computation with automatic memory optimization.
+
+    :param adj:
+        the adjacency matrix.
+    :param indices:
+        the indices for which to compute PPR
+    :param batch_size:
+        the batch size. Will be reduced if necessary
+    :param kwargs:
+        additional keyword-based parameters passed to :func:`power_iteration`
+
+    :return: shape: (n, len(indices))
+        the PPR vectors for each node index
+    """
+    return torch.cat(
+        [
+            power_iteration(adj=adj, x0=prepare_x0(indices=indices_batch, n=adj.shape[0]), **kwargs)
+            for indices_batch in torch.split(indices, batch_size)
+        ],
+        dim=1,
+    )

@@ -122,3 +122,10 @@ class UtilsTest(unittest.TestCase):
         for x0 in (self._valid_x0(), self._valid_x0(size=(self.num_nodes, 12))):
             x = utils.power_iteration(adj=adj, x0=x0, max_iter=5)
             utils.validate_x(x=x, n=self.num_nodes)
+
+    def test_batched_personalized_page_rank(self):
+        """Test batched PPR calculation."""
+        x = utils.batched_personalized_page_rank(
+            adj=self.adj, indices=torch.arange(self.num_nodes), batch_size=self.num_nodes // 3
+        )
+        utils.validate_x(x)

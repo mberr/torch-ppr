@@ -7,10 +7,19 @@ from typing import Optional
 
 import torch
 
-from .utils import DeviceHint, power_iteration, prepare_page_rank_adjacency, prepare_x0, validate_x
+from .utils import (
+    DeviceHint,
+    batched_personalized_page_rank,
+    power_iteration,
+    prepare_page_rank_adjacency,
+    prepare_x0,
+    resolve_device,
+    validate_x,
+)
 
 __all__ = [
     "page_rank",
+    "personalized_page_rank",
 ]
 
 logger = logging.getLogger(__name__)
@@ -46,7 +55,7 @@ def page_rank(
     :param device:
         the device to use, or a hint thereof
 
-    :return: shape: `(n,)` or `(n, batch_size)`
+    :return: shape: `(n,)` or `(batch_size, n)`
         the page-rank vector, i.e., a score between 0 and 1 for each node.
     """
     # normalize inputs
@@ -57,7 +66,7 @@ def page_rank(
     validate_x(x=x0, n=adj.shape[0])
 
     # power iteration
-    return power_iteration(
+    x = power_iteration(
         adj=adj,
         x0=x0,
         alpha=alpha,
@@ -66,3 +75,47 @@ def page_rank(
         epsilon=epsilon,
         device=device,
     )
+    if x.ndim < 2:
+        return x
+    return x.t()
+
+
+def personalized_page_rank(
+    adj: Optional[torch.Tensor] = None,
+    edge_index: Optional[torch.LongTensor] = None,
+    indices: Optional[torch.Tensor] = None,
+    device: DeviceHint = None,
+    batch_size: Optional[int] = None,
+    **kwargs,
+) -> torch.Tensor:
+    """
+    Personalized Page-Rank (PPR) computation.
+
+    .. note::
+        this method supports automatic memory optimization / batch size selection using :mod:`torch_max_mem`.
+
+    :param adj: shape: (n, n)
+        the adjacency matrix, cf. :func:`prepare_page_rank_adjacency`
+    :param edge_index: shape: (2, m)
+        the edge index, cf. :func:`prepare_page_rank_adjacency`
+    :param indices: shape: (k,)
+        the node indices for which to calculate the PPR. Defaults to all nodes.
+    :param device:
+        the device to use
+    :param batch_size: >0
+        the batch size. Defaults to the number of indices. It will be reduced if necessary.
+    :param kwargs:
+        additional keyword-based parameters passed to :func:`batched_personalized_page_rank`
+
+    :return: shape: `(k, n)`
+        the PPR vectors for each node index
+    """
+    # prepare adjacency and indices only once
+    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index)
+    indices = torch.arange(adj.shape[0], device=device)
+    # normalize inputs
+    batch_size = batch_size or len(indices)
+    device = resolve_device(device=device)
+    return batched_personalized_page_rank(
+        adj=adj, indices=indices, device=device, batch_size=batch_size, **kwargs
+    ).t()
