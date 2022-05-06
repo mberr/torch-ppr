@@ -7,7 +7,15 @@ from typing import Optional
 
 import torch
 
-from .utils import DeviceHint, power_iteration, prepare_page_rank_adjacency, prepare_x0, validate_x
+from .utils import (
+    DeviceHint,
+    batched_personalized_page_rank,
+    power_iteration,
+    prepare_page_rank_adjacency,
+    prepare_x0,
+    resolve_device,
+    validate_x,
+)
 
 __all__ = [
     "page_rank",
@@ -65,4 +73,22 @@ def page_rank(
         use_tqdm=use_tqdm,
         epsilon=epsilon,
         device=device,
+    )
+
+
+def personalized_page_rank(
+    adj: Optional[torch.Tensor] = None,
+    edge_index: Optional[torch.LongTensor] = None,
+    indices: Optional[torch.Tensor] = None,
+    device: DeviceHint = None,
+    batch_size: Optional[int] = None,
+    **kwargs,
+) -> torch.Tensor:
+    device = resolve_device(device=device)
+    # prepare adjacency and indices only once
+    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index)
+    indices = torch.arange(adj.shape[0], device=device)
+    batch_size = batch_size or len(indices)
+    return batched_personalized_page_rank(
+        adj=adj, indices=indices, device=device, batch_size=batch_size, **kwargs
     )
