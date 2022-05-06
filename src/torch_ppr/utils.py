@@ -259,15 +259,20 @@ def power_iteration(
     x_old = x = x0
     beta = 1.0 - alpha
     progress = tqdm(range(max_iter), unit_scale=True, leave=False, disable=not use_tqdm)
+    mask = x0.new_ones(x0.shape[0])
     for i in progress:
         # calculate x = (1 - alpha) * A.dot(x) + alpha * x0
-        x = torch.sparse.addmm(input=x0, sparse=adj, dense=x, beta=alpha, alpha=beta)
+        x[mask] = torch.sparse.addmm(
+            input=x0[mask], sparse=adj, dense=x[mask], beta=alpha, alpha=beta
+        )
         # note: while the adjacency matrix should already be row-sum normalized,
         #       we additionally normalize x to avoid accumulating errors due to loss of precision
-        x = functional.normalize(x, dim=0, p=1)
-        max_diff = torch.linalg.norm(x - x_old, ord=float("+inf"), axis=0).max().item()
-        progress.set_postfix(max_diff=max_diff)
-        if max_diff < epsilon:
+        x[mask] = functional.normalize(x[mask], dim=0, p=1)
+        # calculate difference, shape: (batch_size,)
+        diff = torch.linalg.norm(x - x_old, ord=float("+inf"), axis=0)
+        mask = diff > epsilon
+        progress.set_postfix(max_diff=diff.max().item())
+        if not mask.any():
             logger.debug(f"Converged after {i} iterations up to {epsilon}.")
             break
         x_old = x
