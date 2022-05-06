@@ -147,7 +147,8 @@ def prepare_page_rank_adjacency(
     # adjacency normalization: normalize to row-sum = 1
     degree_inv = torch.reciprocal(torch.sparse.sum(adj, dim=0).to_dense())
     degree_inv = torch.sparse_coo_tensor(
-        indices=torch.arange(degree_inv.shape[0]).unsqueeze(dim=0).repeat(2, 1), values=degree_inv
+        indices=torch.arange(degree_inv.shape[0], device=adj.device).unsqueeze(dim=0).repeat(2, 1),
+        values=degree_inv,
     )
     return torch.sparse.mm(mat1=degree_inv, mat2=adj)
 
@@ -259,15 +260,12 @@ def power_iteration(
     x_old = x = x0
     beta = 1.0 - alpha
     progress = tqdm(range(max_iter), unit_scale=True, leave=False, disable=not use_tqdm)
-    mask = x0.new_ones(x0.shape[0])
     for i in progress:
         # calculate x = (1 - alpha) * A.dot(x) + alpha * x0
-        x[mask] = torch.sparse.addmm(
-            input=x0[mask], sparse=adj, dense=x[mask], beta=alpha, alpha=beta
-        )
+        x = torch.sparse.addmm(input=x0, sparse=adj, dense=x, beta=alpha, alpha=beta)
         # note: while the adjacency matrix should already be row-sum normalized,
         #       we additionally normalize x to avoid accumulating errors due to loss of precision
-        x[mask] = functional.normalize(x[mask], dim=0, p=1)
+        x = functional.normalize(x, dim=0, p=1)
         # calculate difference, shape: (batch_size,)
         diff = torch.linalg.norm(x - x_old, ord=float("+inf"), axis=0)
         mask = diff > epsilon
