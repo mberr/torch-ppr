@@ -39,23 +39,26 @@ def page_rank(
     Compute page rank by power iteration.
 
     :param adj:
-        the adjacency matrix, cf. :func:`prepare_page_rank_adjacency`. Preferred over `edge_index`.
-    :param edge_index: shape: `(2, m)`
-        the edge index of the graph, i.e, the edge list.
-    :param max_iter: $max_iter > 0$
+        the adjacency matrix, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`. Preferred over ``edge_index``.
+    :param edge_index: shape: ``(2, m)``
+        the edge index of the graph, i.e, the edge list. cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
+
+    :param max_iter: ``max_iter > 0``
         the maximum number of iterations
-    :param alpha: $0 < alpha < 1$
+    :param alpha: ``0 < alpha < 1``
         the smoothing value / teleport probability
-    :param epsilon: $epsilon > 0$
+    :param epsilon: ``epsilon > 0``
         a (small) constant to check for convergence
-    :param x0: shape: `(n,)`
-        the initial value for $x$. If `None`, set to a constant $1/n$ vector.
+    :param x0: shape: ``(n,)``
+        the initial value for ``x``. If ``None``, set to a constant $1/n$ vector,
+        cf. :func:`torch_ppr.utils.prepare_x0`. Otherwise, the tensor is checked for being valid using
+        :func:`torch_ppr.utils.validate_x`.
     :param use_tqdm:
         whether to use a tqdm progress bar
     :param device:
         the device to use, or a hint thereof
 
-    :return: shape: `(n,)` or `(batch_size, n)`
+    :return: shape: ``(n,)`` or ``(batch_size, n)``
         the page-rank vector, i.e., a score between 0 and 1 for each node.
     """
     # normalize inputs
@@ -94,25 +97,29 @@ def personalized_page_rank(
     .. note::
         this method supports automatic memory optimization / batch size selection using :mod:`torch_max_mem`.
 
-    :param adj: shape: (n, n)
-        the adjacency matrix, cf. :func:`prepare_page_rank_adjacency`
-    :param edge_index: shape: (2, m)
-        the edge index, cf. :func:`prepare_page_rank_adjacency`
-    :param indices: shape: (k,)
+    :param adj: shape: ``(n, n)``
+        the adjacency matrix, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
+    :param edge_index: shape: ``(2, m)``
+        the edge index, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
+
+    :param indices: shape: ``(k,)``
         the node indices for which to calculate the PPR. Defaults to all nodes.
     :param device:
         the device to use
-    :param batch_size: >0
+    :param batch_size: ``batch_size > 0``
         the batch size. Defaults to the number of indices. It will be reduced if necessary.
     :param kwargs:
-        additional keyword-based parameters passed to :func:`batched_personalized_page_rank`
+        additional keyword-based parameters passed to :func:`torch_ppr.utils.batched_personalized_page_rank`
 
-    :return: shape: `(k, n)`
+    :return: shape: ``(k, n)``
         the PPR vectors for each node index
     """
     # prepare adjacency and indices only once
     adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index)
-    indices = torch.arange(adj.shape[0], device=device)
+    if indices is None:
+        indices = torch.arange(adj.shape[0], device=device)
+    else:
+        indices = torch.as_tensor(indices, dtype=torch.long, device=device)
     # normalize inputs
     batch_size = batch_size or len(indices)
     device = resolve_device(device=device)

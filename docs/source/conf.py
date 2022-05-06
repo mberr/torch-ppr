@@ -70,7 +70,6 @@ extensions = [
 ]
 
 
-
 # generate autosummary pages
 autosummary_generate = True
 
@@ -228,6 +227,8 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     "https://docs.python.org/3/": None,
+    "torch": ("https://pytorch.org/docs/stable", None),
+    "torch_max_mem": ("https://torch-max-mem.readthedocs.io/en/stable/", None),
 }
 
 autoclass_content = "both"
