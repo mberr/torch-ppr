@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 DeviceHint = Union[None, str, torch.device]
 
 
-def resolve_device(device: DeviceHint) -> torch.device:
+def resolve_device(device: DeviceHint = None) -> torch.device:
     """
     Resolve the device to use.
 
