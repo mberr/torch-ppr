@@ -4,8 +4,8 @@ from typing import Any, Collection, Mapping, Optional, Union
 
 import torch
 from torch.nn import functional
-from tqdm.auto import tqdm
 from torch_max_mem import MemoryUtilizationMaximizer
+from tqdm.auto import tqdm
 
 __all__ = [
     "DeviceHint",

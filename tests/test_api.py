@@ -1,7 +1,9 @@
 """Tests for public API."""
 
-import torch
 import unittest
+
+import torch
+
 from torch_ppr import api
 
 
