@@ -77,7 +77,7 @@ def page_rank(
     )
     if x.ndim < 2:
         return x
-    return x.transpose()
+    return x.t()
 
 
 def personalized_page_rank(
@@ -118,4 +118,4 @@ def personalized_page_rank(
     device = resolve_device(device=device)
     return batched_personalized_page_rank(
         adj=adj, indices=indices, device=device, batch_size=batch_size, **kwargs
-    ).transpose()
+    ).t()
