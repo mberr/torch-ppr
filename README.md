@@ -45,7 +45,7 @@ which also supports calculation on GPU (or other accelerators).
 
 As a simple example, consider this simple graph with five nodes.
 <p align="center">
-  <img src="docs/source/img/small_graph.svg" height="150">
+  <img src="docs/source/img/small_graph.svg" height="300">
 </p>
 
 Its edge list is given as
