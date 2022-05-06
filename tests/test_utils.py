@@ -26,18 +26,17 @@ class UtilsTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Prepare data."""
-        identity_indices = torch.arange(self.num_nodes).unsqueeze(0).repeat(2, 1)
         self.edge_index = torch.cat(
             [
                 torch.randint(self.num_nodes, size=(2, self.num_edges - self.num_nodes)),
                 # ensure connectivity
-                identity_indices,
+                torch.arange(self.num_nodes).unsqueeze(0).repeat(2, 1),
             ],
             dim=-1,
         )
-        source_indices = self.edge_index[0].tolist()
-        counts = Counter(source_indices)
-        values = torch.as_tensor([1.0 / counts[i] for i in source_indices])
+        target_indices = self.edge_index[1].tolist()
+        counts = Counter(target_indices)
+        values = torch.as_tensor([1.0 / counts[i] for i in target_indices])
         self.adj = torch.sparse_coo_tensor(indices=self.edge_index, values=values)
 
     def _verify_adjacency(self, adj: torch.Tensor):
