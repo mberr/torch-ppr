@@ -71,7 +71,7 @@ tensor([[0.1103, 0.3484, 0.2922, 0.1103, 0.1388]])
 ```
 
 By the virtue of using PyTorch, the code seamlessly works on GPUs, too, and
-support auto-grad differentiation. Moreover, the calculation of personalized
+supports auto-grad differentiation. Moreover, the calculation of personalized
 page rank supports automatic batch size optimization via
 [`torch_max_mem`](https://github.com/mberr/torch-max-mem).
 
