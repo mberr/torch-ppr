@@ -84,11 +84,34 @@ def personalized_page_rank(
     batch_size: Optional[int] = None,
     **kwargs,
 ) -> torch.Tensor:
-    device = resolve_device(device=device)
+    """
+    Personalized Page-Rank (PPR) computation.
+
+    .. note::
+        this method supports automatic memory optimization / batch size selection using :mod:`torch_max_mem`.
+
+    :param adj: shape: (n, n)
+        the adjacency matrix, cf. :func:`prepare_page_rank_adjacency`
+    :param edge_index: shape: (2, m)
+        the edge index, cf. :func:`prepare_page_rank_adjacency`
+    :param indices: shape: (k,)
+        the node indices for which to calculate the PPR. Defaults to all nodes.
+    :param device:
+        the device to use
+    :param batch_size: >0
+        the batch size. Defaults to the number of indices. It will be reduced if necessary.
+    :param kwargs:
+        additional keyword-based parameters passed to :func:`batched_personalized_page_rank`
+
+    :return: shape: `(n, k)`
+        the PPR vectors for each node index
+    """
     # prepare adjacency and indices only once
     adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index)
     indices = torch.arange(adj.shape[0], device=device)
+    # normalize inputs
     batch_size = batch_size or len(indices)
+    device = resolve_device(device=device)
     return batched_personalized_page_rank(
         adj=adj, indices=indices, device=device, batch_size=batch_size, **kwargs
     )
