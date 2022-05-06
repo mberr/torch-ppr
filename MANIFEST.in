@@ -1,0 +1,14 @@
+graft src
+graft tests
+prune scripts
+prune notebooks
+prune tests/.pytest_cache
+
+recursive-include docs/source *.py
+recursive-include docs/source *.rst
+recursive-include docs/source *.png
+
+global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store *.gpickle
+
+include README.md LICENSE
+exclude tox.ini .flake8 .bumpversion.cfg .readthedocs.yml
