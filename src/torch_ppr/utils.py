@@ -270,7 +270,9 @@ def power_iteration(
         diff = torch.linalg.norm(x - x_old, ord=float("+inf"), axis=0)
         mask = diff > epsilon
         if use_tqdm:
-            progress.set_postfix(max_diff=diff.max().item(), non_converged=mask.sum().item())
+            progress.set_postfix(
+                max_diff=diff.max().item(), converged=1.0 - mask.float().mean().item()
+            )
         if not mask.any():
             logger.debug(f"Converged after {i} iterations up to {epsilon}.")
             break
