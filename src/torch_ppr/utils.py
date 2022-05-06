@@ -76,14 +76,16 @@ def edge_index_to_sparse_matrix(
     """
     Convert an edge index to a sparse matrix.
 
-    :param edge_index: shape: $(2, m)$
+    Uses the edge index for non-zero entries, and fills in ``1`` as entries.
+
+    :param edge_index: shape: ``(2, m)``
         the edge index
     :param num_nodes:
         the number of nodes used to determine the shape of the matrix.
-        If `None`, it is inferred from `edge_index`.
+        If ``None``, it is inferred from ``edge_index``.
 
-    :return: shape: $(n, n)$
-        the adjacency matrix as a sparse tensor
+    :return: shape: ``(n, n)``
+        the adjacency matrix as a sparse tensor, cf. :func:`torch.sparse_coo_tensor`.
     """
     num_nodes = prepare_num_nodes(edge_index=edge_index, num_nodes=num_nodes)
     return torch.sparse_coo_tensor(
@@ -99,10 +101,10 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
 
     In particular, the method checks that
 
-    - the shape is (n, n)
-    - the row-sum is 1
+    - the shape is ``(n, n)``
+    - the row-sum is ``1``
 
-    :param adj: shape: (n, n)
+    :param adj: shape: ``(n, n)``
         the adjacency matrix
     :param n:
         the number of nodes
@@ -128,15 +130,23 @@ def prepare_page_rank_adjacency(
     """
     Prepare the page-rank adjacency matrix.
 
-    :param adj: shape: $(n, n)$
+    If no explicit adjacency is given, the methods first creates an adjacency matrix from the edge index,
+    cf. :func:`edge_index_to_sparse_matrix`. Next, the matrix is symmetrized as
+
+    .. math::
+        A := A + A^T
+
+    Finally, the matrix is normalized such that the columns sum to one.
+
+    :param adj: shape: ``(n, n)``
         the adjacency matrix
-    :param edge_index: shape: $(2, m)$
+    :param edge_index: shape: ``(2, m)``
         the edge index
 
     :raises ValueError:
         if neither is provided
 
-    :return: shape: $(n, n)$
+    :return: shape: ``(n, n)``
         the symmetric, normalized, and sparse adjacency matrix
     """
     if adj is not None:
@@ -164,9 +174,9 @@ def validate_x(x: torch.Tensor, n: Optional[int] = None) -> None:
 
     In particular, the method checks that
 
-    - the tensor dimension is (n,) or (n, batch_size)
-    - all entries are between 0 and 1
-    - the entries sum to 1 (along the first dimension)
+    - the tensor dimension is ``(n,)`` or ``(n, batch_size)``
+    - all entries are between ``0`` and ``1``
+    - the entries sum to ``1`` (along the first dimension)
 
     :param x:
         the initial value.
@@ -195,18 +205,25 @@ def prepare_x0(
     """
     Prepare a start value.
 
+    The following precedence order is used:
+
+    1. an explicit start value, via ``x0``. If present, this tensor is passed through without further modification.
+    2. a one-hot matrix created via ``indices``. The matrix is of shape ``(n, len(indices))`` and has a single 1 per
+       column at the given indices.
+    3. a uniform ``1/n`` vector of shape ``(n,)``
+
     :param x0:
-        the start value. It will be passed through. First preference.
+        the start value.
     :param indices:
-        a number of indices. This will create a (n, len(indices)) one-hot vector. Second preference.
+        a non-zero indices
     :param n:
-        the number of nodes. If neither of the other options is given, it will create a constant $1/n$ vector.
+        the number of nodes
 
     :raises ValueError:
-        if neither `x0` nor `n` are provided
+        if neither ``x0`` nor ``n`` are provided
 
-    :return: shape: `(n,)` or `(n, batch_size)`
-        the initial value $x$
+    :return: shape: ``(n,)`` or ``(n, batch_size)``
+        the initial value ``x``
     """
     if x0 is not None:
         return x0
@@ -235,23 +252,23 @@ def power_iteration(
     .. math::
         \mathbf{x}^{(i+1)} = (1 - \alpha) \cdot \mathbf{A} \mathbf{x}^{(i)} + \alpha \mathbf{x}^{(0)}
 
-    :param adj: shape: $(n, n)$
+    :param adj: shape: ``(n, n)``
         the (sparse) adjacency matrix
-    :param x0: shape: $(n,)$, or $(n, batch_size)$
-        the initial value for $x$.
-    :param alpha: $0 < alpha < 1$
+    :param x0: shape: ``(n,)``, or ``(n, batch_size)``
+        the initial value for ``x``.
+    :param alpha: ``0 < alpha < 1``
         the smoothing value / teleport probability
-    :param max_iter: $0 < max_iter$
+    :param max_iter: ``0 < max_iter``
         the maximum number of iterations
-    :param epsilon: $epsilon > 0$
+    :param epsilon: ``epsilon > 0``
         a (small) constant to check for convergence
     :param use_tqdm:
         whether to use a tqdm progress bar
     :param device:
-        the device to use, or a hint thereof
+        the device to use, or a hint thereof, cf. :func:`resolve_device`
 
-    :return: shape: $(n,)$ or $(n, batch_size)$
-        the $x$ value after convergence (or maximum number of iterations).
+    :return: shape: ``(n,)`` or ``(n, batch_size)``
+        the ``x`` value after convergence (or maximum number of iterations).
     """
     # normalize device
     device = resolve_device(device=device)
@@ -309,16 +326,16 @@ def batched_personalized_page_rank(
     """
     Batch-wise PPR computation with automatic memory optimization.
 
-    :param adj:
+    :param adj: shape: ``(n, n)``
         the adjacency matrix.
-    :param indices:
+    :param indices: shape: ``k``
         the indices for which to compute PPR
-    :param batch_size:
+    :param batch_size: ``batch_size > 0``
         the batch size. Will be reduced if necessary
     :param kwargs:
         additional keyword-based parameters passed to :func:`power_iteration`
 
-    :return: shape: (n, len(indices))
+    :return: shape: ``(n, k)``
         the PPR vectors for each node index
     """
     return torch.cat(
