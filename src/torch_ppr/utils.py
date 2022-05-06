@@ -16,6 +16,7 @@ __all__ = [
     "validate_x",
     "prepare_x0",
     "power_iteration",
+    "batched_personalized_page_rank",
 ]
 
 logger = logging.getLogger(__name__)

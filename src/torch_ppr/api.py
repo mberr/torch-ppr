@@ -19,6 +19,7 @@ from .utils import (
 
 __all__ = [
     "page_rank",
+    "personalized_page_rank",
 ]
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ def page_rank(
     :param device:
         the device to use, or a hint thereof
 
-    :return: shape: `(n,)` or `(n, batch_size)`
+    :return: shape: `(n,)` or `(batch_size, n)`
         the page-rank vector, i.e., a score between 0 and 1 for each node.
     """
     # normalize inputs
@@ -65,7 +66,7 @@ def page_rank(
     validate_x(x=x0, n=adj.shape[0])
 
     # power iteration
-    return power_iteration(
+    x = power_iteration(
         adj=adj,
         x0=x0,
         alpha=alpha,
@@ -74,6 +75,9 @@ def page_rank(
         epsilon=epsilon,
         device=device,
     )
+    if x.ndim < 2:
+        return x
+    return x.transpose()
 
 
 def personalized_page_rank(
@@ -103,7 +107,7 @@ def personalized_page_rank(
     :param kwargs:
         additional keyword-based parameters passed to :func:`batched_personalized_page_rank`
 
-    :return: shape: `(n, k)`
+    :return: shape: `(k, n)`
         the PPR vectors for each node index
     """
     # prepare adjacency and indices only once
@@ -114,4 +118,4 @@ def personalized_page_rank(
     device = resolve_device(device=device)
     return batched_personalized_page_rank(
         adj=adj, indices=indices, device=device, batch_size=batch_size, **kwargs
-    )
+    ).transpose()
