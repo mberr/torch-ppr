@@ -113,10 +113,10 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
     if adj.shape != (n, n):
         raise ValueError(f"Invalid shape: {adj.shape}. expected: {(n, n)}")
 
-    # check row-sum
-    adj_sum = torch.sparse.sum(adj, dim=1).to_dense()
+    # check column-sum
+    adj_sum = torch.sparse.sum(adj, dim=0).to_dense()
     if not torch.allclose(adj_sum, torch.ones_like(adj_sum)):
-        raise ValueError(f"Invalid row sum: {adj_sum}. expected 1.0")
+        raise ValueError(f"Invalid column sum: {adj_sum}. expected 1.0")
 
 
 def prepare_page_rank_adjacency(
@@ -146,13 +146,13 @@ def prepare_page_rank_adjacency(
     adj = edge_index_to_sparse_matrix(edge_index=edge_index)
     # symmetrize
     adj = adj + adj.t()
-    # adjacency normalization: normalize to row-sum = 1
+    # adjacency normalization: normalize to col-sum = 1
     degree_inv = torch.reciprocal(torch.sparse.sum(adj, dim=0).to_dense())
     degree_inv = torch.sparse_coo_tensor(
         indices=torch.arange(degree_inv.shape[0], device=adj.device).unsqueeze(dim=0).repeat(2, 1),
         values=degree_inv,
     )
-    return torch.sparse.mm(mat1=degree_inv, mat2=adj)
+    return torch.sparse.mm(mat1=adj, mat2=degree_inv)
 
 
 def validate_x(x: torch.Tensor, n: Optional[int] = None) -> None:
