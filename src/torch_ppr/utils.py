@@ -1,6 +1,6 @@
 """Utility functions."""
 import logging
-from typing import Collection, Optional, Union
+from typing import Any, Collection, Mapping, Optional, Union
 
 import torch
 from torch.nn import functional
@@ -285,7 +285,14 @@ def power_iteration(
     return x
 
 
-ppr_maximizer = MemoryUtilizationMaximizer()
+def _ppr_hasher(kwargs: Mapping[str, Any]) -> int:
+    # assumption: batched PPR memory consumption only depends on the matrix A,
+    # in particular, the shape and the number of nonzero elements
+    adj: torch.Tensor = kwargs.get("adj")
+    return hash((adj.shape[0], getattr(adj, "nnz", adj.numel())))
+
+
+ppr_maximizer = MemoryUtilizationMaximizer(hasher=_ppr_hasher)
 
 
 @ppr_maximizer
@@ -312,7 +319,7 @@ def batched_personalized_page_rank(
     """
     return torch.cat(
         [
-            power_iteration(adj=adj, x0=prepare_x0(indices=indices, n=adj.shape[0]), **kwargs)
+            power_iteration(adj=adj, x0=prepare_x0(indices=indices_batch, n=adj.shape[0]), **kwargs)
             for indices_batch in torch.split(indices, batch_size)
         ],
         dim=1,
