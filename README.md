@@ -62,7 +62,8 @@ tensor([0.1269, 0.3694, 0.2486, 0.1269, 0.1281])
 ```
 to calculate the page rank, i.e., a measure of global importance.
 We notice that the central node receives the largest importance score,
-while all other nodes have equal importance.
+while all other nodes have lower importance. Moreover, the two
+indistinguishable nodes `0` and `3` receive the same page rank.
 
 We can also calculate *personalized* page rank which measures importance
 from the perspective of a single node.
@@ -72,6 +73,8 @@ For instance, for node `2`, we have
 >>> personalized_page_rank(edge_index=edge_index, indices=[2])
 tensor([[0.1103, 0.3484, 0.2922, 0.1103, 0.1388]])
 ```
+Thus, the most important node is the central node `1`, nodes `0` and `3` receive
+the same importance value which is below the value of the direct neighbor `4`.
 
 By the virtue of using PyTorch, the code seamlessly works on GPUs, too, and
 supports auto-grad differentiation. Moreover, the calculation of personalized
