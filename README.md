@@ -50,11 +50,13 @@ As a simple example, consider this simple graph with five nodes.
 
 Its edge list is given as
 ```python-console
+>>> import torch
 >>> edge_index = torch.as_tensor(data=[(0, 1), (1, 2), (1, 3), (2, 4)]).t()
 ```
 
 We can use
 ```python-console
+>>> from torch_ppr import page_rank
 >>> page_rank(edge_index)
 tensor([0.1269, 0.3694, 0.2486, 0.1269, 0.1281])
 ```
@@ -66,6 +68,7 @@ We can also calculate *personalized* page rank which measures importance
 from the perspective of a single node.
 For instance, for node `2`, we have
 ```python-console
+>>> from torch_ppr import personalized_page_rank
 >>> personalized_page_rank(edge_index=edge_index, indices=[2])
 tensor([[0.1103, 0.3484, 0.2922, 0.1103, 0.1388]])
 ```
@@ -77,14 +80,12 @@ page rank supports automatic batch size optimization via
 
 ## 🚀 Installation
 
-<!-- Uncomment this section after your first ``tox -e finish``
 The most recent release can be installed from
 [PyPI](https://pypi.org/project/torch_ppr/) with:
 
 ```bash
 $ pip install torch_ppr
 ```
--->
 
 The most recent code and data can be installed directly from GitHub with:
 
