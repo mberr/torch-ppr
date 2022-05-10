@@ -125,7 +125,9 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
 
 
 def prepare_page_rank_adjacency(
-    adj: Optional[torch.Tensor] = None, edge_index: Optional[torch.LongTensor] = None
+    adj: Optional[torch.Tensor] = None,
+    edge_index: Optional[torch.LongTensor] = None,
+    num_nodes: Optional[int] = None,
 ) -> torch.Tensor:
     """
     Prepare the page-rank adjacency matrix.
@@ -142,6 +144,9 @@ def prepare_page_rank_adjacency(
         the adjacency matrix
     :param edge_index: shape: ``(2, m)``
         the edge index
+    :param num_nodes:
+        the number of nodes used to determine the shape of the adjacency matrix.
+        If ``None``, and ``adj`` is not already provided, it is inferred from ``edge_index``.
 
     :raises ValueError:
         if neither is provided
@@ -156,7 +161,7 @@ def prepare_page_rank_adjacency(
         raise ValueError("Must provide at least one of `adj` and `edge_index`.")
 
     # convert to sparse matrix, shape: (n, n)
-    adj = edge_index_to_sparse_matrix(edge_index=edge_index)
+    adj = edge_index_to_sparse_matrix(edge_index=edge_index, num_nodes=num_nodes)
     # symmetrize
     adj = adj + adj.t()
     # adjacency normalization: normalize to col-sum = 1
