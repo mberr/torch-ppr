@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 def page_rank(
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
+    num_nodes: Optional[int] = None,
     max_iter: int = 1_000,
     alpha: float = 0.05,
     epsilon: float = 1.0e-04,
@@ -42,6 +43,9 @@ def page_rank(
         the adjacency matrix, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`. Preferred over ``edge_index``.
     :param edge_index: shape: ``(2, m)``
         the edge index of the graph, i.e, the edge list. cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
+    :param num_nodes:
+        the number of nodes used to determine the shape of the adjacency matrix.
+        If ``None``, and ``adj`` is not already provided, it is inferred from ``edge_index``.
 
     :param max_iter: ``max_iter > 0``
         the maximum number of iterations
@@ -58,11 +62,12 @@ def page_rank(
     :param device:
         the device to use, or a hint thereof
 
+
     :return: shape: ``(n,)`` or ``(batch_size, n)``
         the page-rank vector, i.e., a score between 0 and 1 for each node.
     """
     # normalize inputs
-    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index)
+    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index, num_nodes=num_nodes)
     x0 = prepare_x0(x0=x0, n=adj.shape[0])
 
     # input normalization
@@ -86,6 +91,7 @@ def page_rank(
 def personalized_page_rank(
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
+    num_nodes: Optional[int] = None,
     indices: Optional[torch.Tensor] = None,
     device: DeviceHint = None,
     batch_size: Optional[int] = None,
@@ -101,6 +107,9 @@ def personalized_page_rank(
         the adjacency matrix, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
     :param edge_index: shape: ``(2, m)``
         the edge index, cf. :func:`torch_ppr.utils.prepare_page_rank_adjacency`
+    :param num_nodes:
+        the number of nodes used to determine the shape of the adjacency matrix.
+        If ``None``, and ``adj`` is not already provided, it is inferred from ``edge_index``.
 
     :param indices: shape: ``(k,)``
         the node indices for which to calculate the PPR. Defaults to all nodes.
@@ -117,7 +126,9 @@ def personalized_page_rank(
     # resolve device first
     device = resolve_device(device=device)
     # prepare adjacency and indices only once
-    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index).to(device=device)
+    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index, num_nodes=num_nodes).to(
+        device=device
+    )
     if indices is None:
         indices = torch.arange(adj.shape[0], device=device)
     else:
