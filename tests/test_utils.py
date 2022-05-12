@@ -77,8 +77,18 @@ class UtilsTest(unittest.TestCase):
                 values=torch.empty(0),
                 size=(2, 3),
             ),
+            # wrong value range
+            torch.sparse_coo_tensor(
+                indices=self.edge_index,
+                values=torch.full(self.num_edges, fill_value=2.0),
+                size=(self.num_nodes, self.num_nodes),
+            ),
             # wrong sum
-            self.adj + 1,
+            torch.sparse_coo_tensor(
+                indices=self.edge_index,
+                values=torch.ones(self.num_edges),
+                size=(self.num_nodes, self.num_nodes),
+            ),
         ):
             with self.assertRaises(ValueError):
                 utils.validate_adjacency(adj=adj)
