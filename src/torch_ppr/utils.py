@@ -112,11 +112,21 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
     :raises ValueError:
         if the adjacency matrix is invalid
     """
+    # check dtype
+    if not torch.is_floating_point(adj):
+        if adj.shape[0] == 2 and adj.shape[1] != 2:
+            logger.warning(
+                "The passed adjacency matrix looks like an edge_index; did you pass it for the wrong parameter?"
+            )
+        raise ValueError(
+            f"Invalid adjacency matrix data type: {adj.dtype}, should be a floating dtype."
+        )
+
     # check shape
     if n is None:
         n = adj.shape[0]
     if adj.shape != (n, n):
-        raise ValueError(f"Invalid shape: {adj.shape}. expected: {(n, n)}")
+        raise ValueError(f"Invalid adjacency matrix shape: {adj.shape}. expected: {(n, n)}")
 
     # check column-sum
     adj_sum = torch.sparse.sum(adj, dim=0).to_dense()
@@ -149,12 +159,13 @@ def prepare_page_rank_adjacency(
         If ``None``, and ``adj`` is not already provided, it is inferred from ``edge_index``.
 
     :raises ValueError:
-        if neither is provided
+        if neither is provided, or the adjacency matrix is invalid
 
     :return: shape: ``(n, n)``
         the symmetric, normalized, and sparse adjacency matrix
     """
     if adj is not None:
+        validate_adjacency(adj=adj)
         return adj
 
     if edge_index is None:
