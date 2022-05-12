@@ -19,7 +19,7 @@ We can use
 
 .. code-block:: python
 
-   >>> page_rank(edge_index)
+   >>> page_rank(edge_index=edge_index)
    tensor([0.1269, 0.3694, 0.2486, 0.1269, 0.1281])
 
 
