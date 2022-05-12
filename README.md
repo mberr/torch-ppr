@@ -57,7 +57,7 @@ Its edge list is given as
 We can use
 ```python-console
 >>> from torch_ppr import page_rank
->>> page_rank(edge_index)
+>>> page_rank(edge_index=edge_index)
 tensor([0.1269, 0.3694, 0.2486, 0.1269, 0.1281])
 ```
 to calculate the page rank, i.e., a measure of global importance.
