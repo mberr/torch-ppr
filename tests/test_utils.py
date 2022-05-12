@@ -60,6 +60,29 @@ class UtilsTest(unittest.TestCase):
             )
             assert adj.shape == (self.num_nodes, self.num_nodes)
 
+    def test_validate_adjacancy(self):
+        """Test adjacency validation."""
+        adj = utils.prepare_page_rank_adjacency(edge_index=self.edge_index)
+        # plain validation with shape inference
+        utils.validate_adjacency(adj=adj)
+        # plain validation with explicit shape
+        utils.validate_adjacency(adj=adj, n=self.num_nodes)
+        # test error raising
+        for adj in (
+            # an edge_index instead of adj
+            self.edge_index,
+            # wrong shape
+            torch.sparse_coo_tensor(
+                indices=torch.empty(2, 0, dtype=torch.long),
+                values=torch.empty(0),
+                size=(2, 3),
+            ),
+            # wrong sum
+            self.adj + 1,
+        ):
+            with self.assertRaises(ValueError):
+                utils.validate_adjacency(adj=adj)
+
     def test_prepare_page_rank_adjacency(self):
         """Test adjacency preparation."""
         for (adj, edge_index) in (
