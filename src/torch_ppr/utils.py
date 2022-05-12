@@ -165,7 +165,6 @@ def prepare_page_rank_adjacency(
         the symmetric, normalized, and sparse adjacency matrix
     """
     if adj is not None:
-        validate_adjacency(adj=adj)
         return adj
 
     if edge_index is None:

@@ -14,6 +14,7 @@ from .utils import (
     prepare_page_rank_adjacency,
     prepare_x0,
     resolve_device,
+    validate_adjacency,
     validate_x,
 )
 
@@ -69,6 +70,8 @@ def page_rank(
     """
     # normalize inputs
     adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index, num_nodes=num_nodes)
+    validate_adjacency(adj=adj)
+
     x0 = prepare_x0(x0=x0, n=adj.shape[0])
 
     # input normalization
@@ -131,6 +134,8 @@ def personalized_page_rank(
     adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index, num_nodes=num_nodes).to(
         device=device
     )
+    validate_adjacency(adj=adj)
+
     if indices is None:
         indices = torch.arange(adj.shape[0], device=device)
     else:
