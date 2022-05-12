@@ -15,5 +15,5 @@ class TestVersion(unittest.TestCase):
 
         This is only meant to be an example test.
         """
-        version = get_version()
+        version = get_version(with_git_hash=True)
         self.assertIsInstance(version, str)
