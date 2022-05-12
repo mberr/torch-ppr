@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def page_rank(
+    *,
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
     num_nodes: Optional[int] = None,
@@ -89,6 +90,7 @@ def page_rank(
 
 
 def personalized_page_rank(
+    *,
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
     num_nodes: Optional[int] = None,
