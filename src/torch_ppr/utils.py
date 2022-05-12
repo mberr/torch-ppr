@@ -128,6 +128,14 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
     if adj.shape != (n, n):
         raise ValueError(f"Invalid adjacency matrix shape: {adj.shape}. expected: {(n, n)}")
 
+    # check value range
+    adj = adj.coalesce()
+    values = adj.values()
+    if (values < 0.0).any() or (values > 1.0).any():
+        raise ValueError(
+            f"Invalid values outside of [0, 1]: min={values.min().item()}, max={values.max().item()}"
+        )
+
     # check column-sum
     adj_sum = torch.sparse.sum(adj, dim=0).to_dense()
     if not torch.allclose(adj_sum, torch.ones_like(adj_sum)):
