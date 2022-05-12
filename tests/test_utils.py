@@ -26,6 +26,8 @@ class UtilsTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Prepare data."""
+        # fix seed for reproducible tests
+        torch.manual_seed(seed=42)
         self.edge_index = torch.cat(
             [
                 torch.randint(self.num_nodes, size=(2, self.num_edges - self.num_nodes)),
@@ -80,7 +82,7 @@ class UtilsTest(unittest.TestCase):
             # wrong value range
             torch.sparse_coo_tensor(
                 indices=self.edge_index,
-                values=torch.full(self.num_edges, fill_value=2.0),
+                values=torch.full(size=(self.num_edges,), fill_value=2.0),
                 size=(self.num_nodes, self.num_nodes),
             ),
             # wrong sum
