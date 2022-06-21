@@ -55,10 +55,10 @@ jobs:
     strategy:
       matrix:
         python-version: [ "3.8", "3.9", "3.10" ]
-        torch-version: [ "1.10", "1.11" ]
+        torch-version: [ "torch-1.10", "torch-1.11" ]
         exclude:
           - python-version: "3.10"
-            torch-version: "1.10"
+            torch-version: "torch-1.10"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -69,7 +69,7 @@ jobs:
         run: pip install tox
       - name: Test with pytest and generate coverage file
         run:
-          tox -e py-torch{${{ matrix.torch-version }}}
+          tox -e py-{${{ matrix.torch-version }}}
       - name: Upload coverage report to codecov
         uses: codecov/codecov-action@v1
         if: success()
