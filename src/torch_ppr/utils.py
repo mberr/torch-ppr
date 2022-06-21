@@ -138,7 +138,7 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
 
     # check column-sum
     adj_sum = torch.sparse.sum(adj, dim=0).to_dense()
-    if not torch.allclose(adj_sum, torch.ones_like(adj_sum)):
+    if not torch.allclose(adj_sum, torch.ones_like(adj_sum), rtol=1.0e-04):
         raise ValueError(f"Invalid column sum: {adj_sum}. expected 1.0")
 
 
