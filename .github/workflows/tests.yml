@@ -52,6 +52,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ "3.8", "3.9", "3.10" ]
+        torch-version: ["10", "11"]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -62,7 +63,7 @@ jobs:
         run: pip install tox
       - name: Test with pytest and generate coverage file
         run:
-          tox -e py
+          tox -e py-torch{${{ matrix.torch-version }}}
       - name: Upload coverage report to codecov
         uses: codecov/codecov-action@v1
         if: success()
