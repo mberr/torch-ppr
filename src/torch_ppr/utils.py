@@ -312,7 +312,18 @@ def power_iteration(
     progress = tqdm(range(max_iter), unit_scale=True, leave=False, disable=not use_tqdm)
     for i in progress:
         # calculate x = (1 - alpha) * A.dot(x) + alpha * x0
-        x = torch.sparse.addmm(input=x0, sparse=adj, dense=x, beta=alpha, alpha=beta)
+        x = torch.sparse.addmm(
+            # dense matrix to be added
+            x0,
+            # sparse matrix to be multiplied
+            adj,
+            # dense matrix to be multiplied
+            x,
+            # multiplier for added matrix
+            beta=alpha,
+            # multiplier for product
+            alpha=beta,
+        )
         # note: while the adjacency matrix should already be row-sum normalized,
         #       we additionally normalize x to avoid accumulating errors due to loss of precision
         x = functional.normalize(x, dim=0, p=1)
