@@ -69,6 +69,8 @@ class UtilsTest(unittest.TestCase):
         utils.validate_adjacency(adj=adj)
         # plain validation with explicit shape
         utils.validate_adjacency(adj=adj, n=self.num_nodes)
+        # validation with CSR matrix
+        utils.validate_adjacency(adj=adj.to_sparse_csr())
         # test error raising
         for adj in (
             # an edge_index instead of adj

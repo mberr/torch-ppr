@@ -129,7 +129,8 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
         raise ValueError(f"Invalid adjacency matrix shape: {adj.shape}. expected: {(n, n)}")
 
     # check value range
-    adj = adj.coalesce()
+    if adj.is_sparse and not adj.is_sparse_csr:
+        adj = adj.coalesce()
     values = adj.values()
     if (values < 0.0).any() or (values > 1.0).any():
         raise ValueError(
@@ -137,7 +138,11 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
         )
 
     # check column-sum
-    adj_sum = torch.sparse.sum(adj, dim=0).to_dense()
+    if adj.is_sparse and not adj.is_sparse_csr:
+        adj_sum = torch.sparse.sum(adj, dim=0).to_dense()
+    else:
+        # hotfix until torch.sparse.sum is implemented
+        adj_sum = adj.t() @ torch.ones(adj.shape[0])
     if not torch.allclose(adj_sum, torch.ones_like(adj_sum), rtol=1.0e-04):
         raise ValueError(f"Invalid column sum: {adj_sum}. expected 1.0")
 
