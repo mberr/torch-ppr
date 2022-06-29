@@ -51,14 +51,12 @@ jobs:
         run: tox -e docs-test
   tests:
     name: Tests
-    runs-on: ubuntu-latest
     strategy:
       matrix:
+        os: [ "ubuntu-latest" ]
         python-version: [ "3.8", "3.9", "3.10" ]
         torch-version: [ "torch-1.11", "torch-1.12" ]
-        exclude:
-          - python-version: "3.10"
-            torch-version: "torch-1.10"
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -69,30 +67,9 @@ jobs:
         run: pip install tox
       - name: Test with pytest and generate coverage file
         run:
-          tox -e py-{${{ matrix.torch-version }}}
+          tox -e py-${{ matrix.torch-version }}
       - name: Upload coverage report to codecov
         uses: codecov/codecov-action@v1
         if: success()
         with:
           file: coverage.xml
-  windows:
-    name: Windows
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: [ "3.8", "3.9", "3.10" ]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          conda install pip setuptools wheel
-          conda install pytorch torchvision torchaudio cudatoolkit=11.6 -c pytorch -c conda-forge
-          pip install -e .[tests]
-      - name: Run fast tests
-        run: pytest --durations=20 tests -m "not slow"
-      - name: Run slow tests
-        run: pytest --durations=20 tests -m "slow"
