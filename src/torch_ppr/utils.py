@@ -193,7 +193,7 @@ def prepare_page_rank_adjacency(
         indices=torch.arange(degree_inv.shape[0], device=adj.device).unsqueeze(dim=0).repeat(2, 1),
         values=degree_inv,
     )
-    return torch.sparse.mm(mat1=adj, mat2=degree_inv)
+    return torch.sparse.mm(adj, degree_inv)
 
 
 def validate_x(x: torch.Tensor, n: Optional[int] = None) -> None:
