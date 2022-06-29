@@ -53,8 +53,7 @@ jobs:
     name: Tests
     strategy:
       matrix:
-        # cf. https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
-        os: [ "ubuntu-latest", "windows-latest" ]
+        os: [ "ubuntu-latest" ]
         python-version: [ "3.8", "3.9", "3.10" ]
         torch-version: [ "torch-1.11", "torch-1.12" ]
     runs-on: ${{ matrix.os }}
