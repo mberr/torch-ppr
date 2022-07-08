@@ -144,7 +144,9 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None):
         # hotfix until torch.sparse.sum is implemented
         adj_sum = adj.t() @ torch.ones(adj.shape[0])
     if not torch.allclose(adj_sum, torch.ones_like(adj_sum), rtol=1.0e-04):
-        raise ValueError(f"Invalid column sum: {adj_sum}. expected 1.0")
+        raise ValueError(
+            f"Invalid column sum: {adj_sum} (min: {adj_sum.min().item()}, max: {adj_sum.max().item()}). expected 1.0"
+        )
 
 
 def prepare_page_rank_adjacency(
