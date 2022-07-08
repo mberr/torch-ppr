@@ -147,7 +147,8 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None, rtol: float =
         adj_sum = adj.t() @ torch.ones(adj.shape[0])
     if not torch.allclose(adj_sum, torch.ones_like(adj_sum), rtol=rtol):
         raise ValueError(
-            f"Invalid column sum: {adj_sum} (min: {adj_sum.min().item()}, max: {adj_sum.max().item()}). expected 1.0 with a tolerance of {rtol}"
+            f"Invalid column sum: {adj_sum} (min: {adj_sum.min().item()}, max: {adj_sum.max().item()}). "
+            f"Expected 1.0 with a relative tolerance of {rtol}.",
         )
 
 
