@@ -198,7 +198,7 @@ def prepare_page_rank_adjacency(
     # symmetrize
     adj = adj + adj.t()
     # adjacency normalization: normalize to col-sum = 1
-    degree_inv = torch.reciprocal(torch.sparse.sum(adj, dim=0).to_dense())
+    degree_inv = torch.reciprocal(torch.sparse.sum(adj, dim=0).to_dense().clamp_min(min=1.0e-08))
     degree_inv = torch.sparse_coo_tensor(
         indices=torch.arange(degree_inv.shape[0], device=adj.device).unsqueeze(dim=0).repeat(2, 1),
         values=degree_inv,
