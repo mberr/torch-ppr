@@ -145,7 +145,12 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None, rtol: float =
     else:
         # hotfix until torch.sparse.sum is implemented
         adj_sum = adj.t() @ torch.ones(adj.shape[0])
-    if not torch.allclose(adj_sum, torch.ones_like(adj_sum), rtol=rtol):
+    exp_sum = torch.ones_like(adj_sum)
+    mask = adj_sum == 0
+    if mask.any():
+        logger.warning(f"Adjacency contains {mask.sum().item()} isolated nodes.")
+        exp_sum[mask] = 0.0
+    if not torch.allclose(adj_sum, exp_sum, rtol=rtol):
         raise ValueError(
             f"Invalid column sum: {adj_sum} (min: {adj_sum.min().item()}, max: {adj_sum.max().item()}). "
             f"Expected 1.0 with a relative tolerance of {rtol}.",
