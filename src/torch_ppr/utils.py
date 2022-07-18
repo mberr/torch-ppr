@@ -157,6 +157,21 @@ def validate_adjacency(adj: torch.Tensor, n: Optional[int] = None, rtol: float =
         )
 
 
+def sparse_diagonal(values: torch.Tensor) -> torch.Tensor:
+    """Create a sparse diagonal matrix with the given values.
+
+    :param values: shape: ``(n,)``
+        the values
+
+    :return: shape: ``(n, n)``
+        a sparse diagonal matrix
+    """
+    return torch.sparse_coo_tensor(
+        indices=torch.arange(values.shape[0], device=values.device).unsqueeze(dim=0).repeat(2, 1),
+        values=values,
+    )
+
+
 def prepare_page_rank_adjacency(
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
@@ -202,10 +217,7 @@ def prepare_page_rank_adjacency(
     degree_inv = torch.reciprocal(
         torch.sparse.sum(adj, dim=0).to_dense().clamp_min(min=torch.finfo(adj.dtype).eps)
     )
-    degree_inv = torch.sparse_coo_tensor(
-        indices=torch.arange(degree_inv.shape[0], device=adj.device).unsqueeze(dim=0).repeat(2, 1),
-        values=degree_inv,
-    )
+    degree_inv = sparse_diagonal(values=degree_inv)
     return torch.sparse.mm(adj, degree_inv)
 
 
