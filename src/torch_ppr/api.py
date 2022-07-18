@@ -31,6 +31,7 @@ def page_rank(
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
     num_nodes: Optional[int] = None,
+    add_identity: bool = False,
     max_iter: int = 1_000,
     alpha: float = 0.05,
     epsilon: float = 1.0e-04,
@@ -48,6 +49,8 @@ def page_rank(
     :param num_nodes:
         the number of nodes used to determine the shape of the adjacency matrix.
         If ``None``, and ``adj`` is not already provided, it is inferred from ``edge_index``.
+    :param add_identity:
+        whether to add an identity matrix to ``A`` to ensure that each node has a degree of at least one.
 
     :param max_iter: ``max_iter > 0``
         the maximum number of iterations
@@ -69,7 +72,9 @@ def page_rank(
         the page-rank vector, i.e., a score between 0 and 1 for each node.
     """
     # normalize inputs
-    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index, num_nodes=num_nodes)
+    adj = prepare_page_rank_adjacency(
+        adj=adj, edge_index=edge_index, num_nodes=num_nodes, add_identity=add_identity
+    )
     validate_adjacency(adj=adj)
 
     x0 = prepare_x0(x0=x0, n=adj.shape[0])
@@ -96,6 +101,7 @@ def personalized_page_rank(
     *,
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
+    add_identity: bool = False,
     num_nodes: Optional[int] = None,
     indices: Optional[torch.Tensor] = None,
     device: DeviceHint = None,
@@ -115,6 +121,8 @@ def personalized_page_rank(
     :param num_nodes:
         the number of nodes used to determine the shape of the adjacency matrix.
         If ``None``, and ``adj`` is not already provided, it is inferred from ``edge_index``.
+    :param add_identity:
+        whether to add an identity matrix to ``A`` to ensure that each node has a degree of at least one.
 
     :param indices: shape: ``(k,)``
         the node indices for which to calculate the PPR. Defaults to all nodes.
@@ -131,9 +139,9 @@ def personalized_page_rank(
     # resolve device first
     device = resolve_device(device=device)
     # prepare adjacency and indices only once
-    adj = prepare_page_rank_adjacency(adj=adj, edge_index=edge_index, num_nodes=num_nodes).to(
-        device=device
-    )
+    adj = prepare_page_rank_adjacency(
+        adj=adj, edge_index=edge_index, num_nodes=num_nodes, add_identity=add_identity
+    ).to(device=device)
     validate_adjacency(adj=adj)
 
     if indices is None:
