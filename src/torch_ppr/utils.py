@@ -176,6 +176,7 @@ def prepare_page_rank_adjacency(
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
     num_nodes: Optional[int] = None,
+    add_identity: bool = False,
 ) -> torch.Tensor:
     """
     Prepare the page-rank adjacency matrix.
@@ -195,6 +196,8 @@ def prepare_page_rank_adjacency(
     :param num_nodes:
         the number of nodes used to determine the shape of the adjacency matrix.
         If ``None``, and ``adj`` is not already provided, it is inferred from ``edge_index``.
+    :param add_identity:
+        whether to add an identity matrix to ``A`` to ensure that each node has a degree of at least one.
 
     :raises ValueError:
         if neither is provided, or the adjacency matrix is invalid
@@ -212,6 +215,9 @@ def prepare_page_rank_adjacency(
     adj = edge_index_to_sparse_matrix(edge_index=edge_index, num_nodes=num_nodes)
     # symmetrize
     adj = adj + adj.t()
+    if add_identity:
+        adj = adj + sparse_diagonal(torch.ones(adj.shape[0], dtype=adj.dtype, device=adj.device))
+
     # TODO: should we add an identity matrix here?
     # adjacency normalization: normalize to col-sum = 1
     degree_inv = torch.reciprocal(
