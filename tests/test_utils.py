@@ -181,7 +181,3 @@ def test_sparse_diagonal(n: int):
     assert matrix.shape == (n, n)
     assert matrix.is_sparse
     assert torch.allclose(matrix.to_dense(), torch.diag(values))
-
-
-def test_a():
-    utils.prepare_page_rank_adjacency()
