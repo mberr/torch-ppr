@@ -6,6 +6,7 @@ import torch
 from torch.nn import functional
 
 from torch_ppr import utils
+import pytest
 
 
 def test_resolve_device():
@@ -165,3 +166,14 @@ class UtilsTest(unittest.TestCase):
             adj=self.adj, indices=torch.arange(self.num_nodes), batch_size=self.num_nodes // 3
         )
         utils.validate_x(x)
+
+
+@pytest.mark.parametrize("n", [8, 16])
+def test_sparse_diagonal(n: int):
+    """Test for sparse diagonal matrix creation."""
+    values = torch.rand(n)
+    matrix = utils.sparse_diagonal(values=values)
+    assert torch.is_tensor(matrix)
+    assert matrix.shape == (n, n)
+    assert matrix.is_sparse
+    assert torch.allclose(matrix.to_dense(), torch.diag(values))
