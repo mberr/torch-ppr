@@ -2,11 +2,11 @@
 import unittest
 from typing import Counter, Optional, Tuple
 
+import pytest
 import torch
 from torch.nn import functional
 
 from torch_ppr import utils
-import pytest
 
 
 def test_resolve_device():
