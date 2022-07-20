@@ -215,10 +215,10 @@ def prepare_page_rank_adjacency(
     adj = edge_index_to_sparse_matrix(edge_index=edge_index, num_nodes=num_nodes)
     # symmetrize
     adj = adj + adj.t()
+    # add identity matrix if requested
     if add_identity:
         adj = adj + sparse_diagonal(torch.ones(adj.shape[0], dtype=adj.dtype, device=adj.device))
 
-    # TODO: should we add an identity matrix here?
     # adjacency normalization: normalize to col-sum = 1
     degree_inv = torch.reciprocal(
         torch.sparse.sum(adj, dim=0).to_dense().clamp_min(min=torch.finfo(adj.dtype).eps)
