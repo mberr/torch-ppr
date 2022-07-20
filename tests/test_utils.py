@@ -2,6 +2,7 @@
 import unittest
 from typing import Counter, Optional, Tuple
 
+import pytest
 import torch
 from torch.nn import functional
 
@@ -99,14 +100,18 @@ class UtilsTest(unittest.TestCase):
 
     def test_prepare_page_rank_adjacency(self):
         """Test adjacency preparation."""
-        for (adj, edge_index) in (
+        for (adj, edge_index, add_identity) in (
             # from edge index
-            (None, self.edge_index),
+            (None, self.edge_index, False),
             # passing through adjacency matrix
-            (self.adj, None),
-            (self.adj, self.edge_index),
+            (self.adj, None, False),
+            (self.adj, self.edge_index, False),
+            # add identity
+            (None, self.edge_index, True),
         ):
-            adj2 = utils.prepare_page_rank_adjacency(adj=adj, edge_index=edge_index)
+            adj2 = utils.prepare_page_rank_adjacency(
+                adj=adj, edge_index=edge_index, add_identity=add_identity
+            )
             utils.validate_adjacency(adj=adj2, n=self.num_nodes)
             if adj is not None:
                 assert adj is adj2
@@ -165,3 +170,14 @@ class UtilsTest(unittest.TestCase):
             adj=self.adj, indices=torch.arange(self.num_nodes), batch_size=self.num_nodes // 3
         )
         utils.validate_x(x)
+
+
+@pytest.mark.parametrize("n", [8, 16])
+def test_sparse_diagonal(n: int):
+    """Test for sparse diagonal matrix creation."""
+    values = torch.rand(n)
+    matrix = utils.sparse_diagonal(values=values)
+    assert torch.is_tensor(matrix)
+    assert matrix.shape == (n, n)
+    assert matrix.is_sparse
+    assert torch.allclose(matrix.to_dense(), torch.diag(values))

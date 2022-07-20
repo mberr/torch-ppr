@@ -15,9 +15,12 @@ class APITest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Prepare data."""
+        generator = torch.manual_seed(42)
         self.edge_index = torch.cat(
             [
-                torch.randint(self.num_nodes, size=(2, self.num_edges - self.num_nodes)),
+                torch.randint(
+                    self.num_nodes, size=(2, self.num_edges - self.num_nodes), generator=generator
+                ),
                 # ensure connectivity
                 torch.arange(self.num_nodes).unsqueeze(0).repeat(2, 1),
             ],
@@ -50,3 +53,16 @@ class APITest(unittest.TestCase):
         x = page_rank(edge_index=edge_index)
         # verify that central node has the largest PR value
         assert x.argmax() == 1
+
+    def test_page_rank_isolated_vertices(self):
+        """Test Page-Rank with isolated vertices."""
+        # create isolated node, ID=0
+        edge_index = self.edge_index + 1
+        x = page_rank(edge_index=edge_index, add_identity=True)
+        # isolated node has only one self-loop -> no change in mass to initial mass
+        self.assertAlmostEqual(x[0].item(), 1 / (self.num_nodes + 1))
+        # verify that other nodes are unaffected
+        x2 = page_rank(edge_index=self.edge_index)
+        # rescale
+        x2 = x2 * (self.num_nodes / (self.num_nodes + 1))
+        assert torch.allclose(x2, x[1:], atol=1.0e-02)
