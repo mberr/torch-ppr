@@ -15,9 +15,12 @@ class APITest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Prepare data."""
+        generator = torch.manual_seed(42)
         self.edge_index = torch.cat(
             [
-                torch.randint(self.num_nodes, size=(2, self.num_edges - self.num_nodes)),
+                torch.randint(
+                    self.num_nodes, size=(2, self.num_edges - self.num_nodes), generator=generator
+                ),
                 # ensure connectivity
                 torch.arange(self.num_nodes).unsqueeze(0).repeat(2, 1),
             ],
