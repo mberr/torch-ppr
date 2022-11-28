@@ -135,6 +135,16 @@ def personalized_page_rank(
 
     :return: shape: ``(k, n)``
         the PPR vectors for each node index
+        
+    Example of a (weighted) personalized page rank:
+    ```python-console
+    >>> from torch_ppr import personalized_page_rank
+    >>> import torch
+    >>> adj = (torch.rand(300, 300)*10).round().long()
+    >>> indices = torch.LongTensor([1,2])
+    >>> adj_normalized = (adj/adj.sum(dim=0)).to_sparse() # Normalize by rows; each row needs to sum to 1.
+    >>> personalized_page_rank(adj=adj_normalized, indices=indices)
+    ```
     """
     # resolve device first
     device = resolve_device(device=device)
