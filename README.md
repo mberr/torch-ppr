@@ -83,7 +83,7 @@ page rank supports automatic batch size optimization via
 
 If you want to do a weighted personalized pagerank, you can use the `adj` argument: 
 
-```
+```python-console
 >>> from torch_ppr import personalized_page_rank
 >>> import torch
 >>> adj = (torch.rand(300, 300)*10).round().long()
