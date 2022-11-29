@@ -135,22 +135,21 @@ def personalized_page_rank(
 
     :return: shape: ``(k, n)``
         the PPR vectors for each node index
-        
+
     The following shows an example where a custom adjacency matrix is provided. For illustrative purposes, we randomly
     generate one:
 
     >>> import torch
-    >>> adj = (torch.rand(300, 300)*10).round().long().to_sparse()
+    >>> adj = (torch.rand(300, 300)*10).round().to_sparse()
 
-    Next, we need to ensure that the matrix is row-normalized, i.e., the individual rows sum to 1.
+    Next, we need to ensure that the matrix is row-normalized, i.e., the individual rows sum to 1. Here, we re-use a
+    utility method provided by the library:
 
-    .. todo ::
-        extract utility method, and use it here
-    
-    >>> adj_normalized = (adj.to_dense() / adj.to_dense().sum(dim=0)).to_sparse()
+    >>> from torch_ppr.utils import sparse_normalize
+    >>> adj_normalized = sparse_normalize(adj, dim=0)
 
     Finally, we can use this matrix to calculate the personalized page rank for some nodes
-    
+
     >>> from torch_ppr import personalized_page_rank
     >>> indices = torch.as_tensor([1, 2], dtype=torch.long)
     >>> ppr = personalized_page_rank(adj=adj_normalized, indices=indices)
