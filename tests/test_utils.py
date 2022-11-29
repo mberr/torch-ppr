@@ -181,3 +181,19 @@ def test_sparse_diagonal(n: int):
     assert matrix.shape == (n, n)
     assert matrix.is_sparse
     assert torch.allclose(matrix.to_dense(), torch.diag(values))
+
+
+@pytest.mark.parametrize("seed", [21, 42, 63])
+def test_sparse_normalize(seed: int):
+    """Test for sparse matrix normalization."""
+    generator = torch.manual_seed(seed=seed)
+    n_rows, n_cols = torch.randint(10, 20, size=(2,), generator=generator)
+    matrix = torch.rand(size=(n_rows, n_cols), generator=generator)
+    # make sparse
+    matrix[matrix < 0.5] = 0
+    matrix = matrix.to_sparse()
+    # normalize
+    for dim in (0, 1):
+        matrix_norm = utils.sparse_normalize(matrix=matrix, dim=dim)
+        sparse_sum = torch.sparse.sum(matrix_norm, dim=dim)
+        assert torch.allclose(sparse_sum.values(), torch.ones_like(sparse_sum.values()))
