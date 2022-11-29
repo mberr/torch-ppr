@@ -81,7 +81,6 @@ supports auto-grad differentiation. Moreover, the calculation of personalized
 page rank supports automatic batch size optimization via
 [`torch_max_mem`](https://github.com/mberr/torch-max-mem).
 
-
 ## 🚀 Installation
 
 The most recent release can be installed from
