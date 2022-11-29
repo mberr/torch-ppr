@@ -81,16 +81,6 @@ supports auto-grad differentiation. Moreover, the calculation of personalized
 page rank supports automatic batch size optimization via
 [`torch_max_mem`](https://github.com/mberr/torch-max-mem).
 
-If you want to do a weighted personalized pagerank, you can use the `adj` argument: 
-
-```python-console
->>> from torch_ppr import personalized_page_rank
->>> import torch
->>> adj = (torch.rand(300, 300)*10).round().long()
->>> indices = torch.LongTensor([1,2])
->>> adj_normalized = (adj/adj.sum(dim=0)).to_sparse() # Normalize by rows; each row needs to sum to 1.
->>> personalized_page_rank(adj=adj_normalized, indices=indices)
-```
 
 ## 🚀 Installation
 
