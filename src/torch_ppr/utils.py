@@ -181,12 +181,14 @@ def sparse_normalize(matrix: torch.Tensor, dim: int = 0) -> torch.Tensor:
         the sparse matrix
     :param dim:
         the dimension along which to normalize, either 0 for rows or 1 for columns
-    
+
     :return:
         the normalized sparse matrix
     """
     # calculate row/column sum
-    row_or_column_sum = torch.sparse.sum(matrix, dim=dim).to_dense().clamp_min(min=torch.finfo(matrix.dtype).eps)
+    row_or_column_sum = (
+        torch.sparse.sum(matrix, dim=dim).to_dense().clamp_min(min=torch.finfo(matrix.dtype).eps)
+    )
     # invert and create diagonal matrix
     scaling_matrix = sparse_diagonal(values=torch.reciprocal(row_or_column_sum))
     # multiply matrix
@@ -281,7 +283,9 @@ def validate_x(x: torch.Tensor, n: Optional[int] = None) -> None:
 
 
 def prepare_x0(
-    x0: Optional[torch.Tensor] = None, indices: Collection[int] = None, n: Optional[int] = None
+    x0: Optional[torch.Tensor] = None,
+    indices: Optional[Collection[int]] = None,
+    n: Optional[int] = None,
 ) -> torch.Tensor:
     """
     Prepare a start value.
