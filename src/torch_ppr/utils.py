@@ -17,6 +17,7 @@ __all__ = [
     "prepare_x0",
     "power_iteration",
     "batched_personalized_page_rank",
+    "sparse_normalize",
 ]
 
 logger = logging.getLogger(__name__)
@@ -172,6 +173,33 @@ def sparse_diagonal(values: torch.Tensor) -> torch.Tensor:
     )
 
 
+def sparse_normalize(matrix: torch.Tensor, dim: int = 0) -> torch.Tensor:
+    """
+    Normalize a sparse matrix to row/column sum of 1.
+
+    :param matrix:
+        the sparse matrix
+    :param dim:
+        the dimension along which to normalize, either 0 for rows or 1 for columns
+
+    :return:
+        the normalized sparse matrix
+    """
+    # calculate row/column sum
+    row_or_column_sum = (
+        torch.sparse.sum(matrix, dim=dim).to_dense().clamp_min(min=torch.finfo(matrix.dtype).eps)
+    )
+    # invert and create diagonal matrix
+    scaling_matrix = sparse_diagonal(values=torch.reciprocal(row_or_column_sum))
+    # multiply matrix
+    if dim == 0:
+        args = (matrix, scaling_matrix)
+    else:
+        args = (scaling_matrix, matrix)
+    # note: we do not pass by keyword due to instable API
+    return torch.sparse.mm(*args)
+
+
 def prepare_page_rank_adjacency(
     adj: Optional[torch.Tensor] = None,
     edge_index: Optional[torch.LongTensor] = None,
@@ -219,12 +247,8 @@ def prepare_page_rank_adjacency(
     if add_identity:
         adj = adj + sparse_diagonal(torch.ones(adj.shape[0], dtype=adj.dtype, device=adj.device))
 
-    # adjacency normalization: normalize to col-sum = 1
-    degree_inv = torch.reciprocal(
-        torch.sparse.sum(adj, dim=0).to_dense().clamp_min(min=torch.finfo(adj.dtype).eps)
-    )
-    degree_inv = sparse_diagonal(values=degree_inv)
-    return torch.sparse.mm(adj, degree_inv)
+    # adjacency normalization: normalize to row-sum = 1
+    return sparse_normalize(matrix=adj, dim=0)
 
 
 def validate_x(x: torch.Tensor, n: Optional[int] = None) -> None:
@@ -259,7 +283,9 @@ def validate_x(x: torch.Tensor, n: Optional[int] = None) -> None:
 
 
 def prepare_x0(
-    x0: Optional[torch.Tensor] = None, indices: Collection[int] = None, n: Optional[int] = None
+    x0: Optional[torch.Tensor] = None,
+    indices: Optional[Collection[int]] = None,
+    n: Optional[int] = None,
 ) -> torch.Tensor:
     """
     Prepare a start value.
