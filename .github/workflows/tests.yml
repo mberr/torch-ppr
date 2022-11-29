@@ -55,7 +55,7 @@ jobs:
       matrix:
         os: [ "ubuntu-latest" ]
         python-version: [ "3.8", "3.9", "3.10" ]
-        torch-version: [ "torch-1.11", "torch-1.12" ]
+        torch-version: [ "torch-1.11", "torch-1.12", "torch-1.13" ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
